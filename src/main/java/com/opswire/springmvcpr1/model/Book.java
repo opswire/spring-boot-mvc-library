@@ -1,33 +1,54 @@
 package com.opswire.springmvcpr1.model;
 
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotEmpty;
 
+import java.util.Date;
+
+@Entity
+@Table(name = "books")
 public class Book {
+
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @NotEmpty
+    @Column(name = "title")
     private String title;
 
     @NotEmpty
+    @Column(name = "author")
     private String author;
 
     @Min(1900)
     @Max(2100)
+    @Column(name = "year_of_publication")
     private int yearOfPublication;
 
-    private int readerId;
+    @ManyToOne
+    @JoinColumn(name = "reader_id", referencedColumnName = "id")
+    private Person owner;
+
+    @Column(name = "taken_at")
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date takenAt;
+
+    @Transient
+    private boolean isExpired;
 
     public Book() {
     }
 
-    public Book(int id, String title, String author, int yearOfPublication, int readerId) {
+    public Book(int id, String title, String author, int yearOfPublication, Person owner) {
         this.id = id;
         this.title = title;
         this.author = author;
         this.yearOfPublication = yearOfPublication;
-        this.readerId = readerId;
+        this.owner = owner;
     }
 
     public int getId() {
@@ -62,11 +83,27 @@ public class Book {
         this.yearOfPublication = yearOfPublication;
     }
 
-    public int getReaderId() {
-        return readerId;
+    public Person getOwner() {
+        return owner;
     }
 
-    public void setReaderId(int readerId) {
-        this.readerId = readerId;
+    public void setOwner(Person owner) {
+        this.owner = owner;
+    }
+
+    public Date getTakenAt() {
+        return takenAt;
+    }
+
+    public void setTakenAt(Date takenAt) {
+        this.takenAt = takenAt;
+    }
+
+    public boolean getIsExpired() {
+        return isExpired;
+    }
+
+    public void setIsExpired(boolean isExpired) {
+        this.isExpired = isExpired;
     }
 }

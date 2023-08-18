@@ -1,8 +1,8 @@
 package com.opswire.springmvcpr1.controller;
 
-import com.opswire.springmvcpr1.dao.BookDAO;
-import com.opswire.springmvcpr1.dao.PersonDAO;
 import com.opswire.springmvcpr1.model.Person;
+import com.opswire.springmvcpr1.service.BookService;
+import com.opswire.springmvcpr1.service.PersonService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,29 +14,29 @@ import java.util.Optional;
 @Controller
 @RequestMapping("/people")
 public class PersonController {
-    private final PersonDAO personDAO;
-    private final BookDAO bookDAO;
+    private final PersonService personService;
+    private final BookService bookService;
 
-    public PersonController(PersonDAO personDAO, BookDAO bookDAO) {
-        this.personDAO = personDAO;
-        this.bookDAO = bookDAO;
+    public PersonController(PersonService personService, BookService bookService) {
+        this.personService = personService;
+        this.bookService = bookService;
     }
 
     @GetMapping()
     public String index(Model model) {
-        model.addAttribute("people", personDAO.findAll());
+        model.addAttribute("people", personService.findAll());
         return "people/index";
     }
 
     @GetMapping("/{id}")
     public String show(Model model, @PathVariable int id) {
-        Optional<Person> optionalPerson = personDAO.findById(id);
+        Optional<Person> optionalPerson = personService.findById(id);
         if(optionalPerson.isEmpty()) {
             return "redirect:/books";
         }
 
         model.addAttribute("person", optionalPerson.get());
-        model.addAttribute("books", bookDAO.findByReaderId(id));
+        model.addAttribute("books", bookService.findByOwner(optionalPerson.get()));
 
         return "people/show";
     }
@@ -56,13 +56,13 @@ public class PersonController {
             return "people/new";
         }
 
-        personDAO.save(person);
+        personService.save(person);
         return "redirect:/people";
     }
 
     @GetMapping("/{id}/edit")
     public String edit(@PathVariable int id, Model model) {
-        Optional<Person> optionalPerson = personDAO.findById(id);
+        Optional<Person> optionalPerson = personService.findById(id);
         if(optionalPerson.isEmpty()) {
             return "redirect:/books/" + id;
         }
@@ -80,14 +80,14 @@ public class PersonController {
         if (bindingResult.hasErrors()) {
             return "people/edit";
         }
-        personDAO.update(person, id);
+        personService.update(person, id);
 
         return "redirect:/people/" + id;
     }
 
     @DeleteMapping("/{id}")
     public String delete(@PathVariable int id) {
-        personDAO.delete(id);
+        personService.delete(id);
         return "redirect:/people";
     }
 }
